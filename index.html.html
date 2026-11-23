@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>まるごと予定</title>
+<style>
+:root{--bg:#fbfcfd;--card:#fff;--text:#1c2430;--sub:#667085;--line:#e3e7ee;--ac:#1f5fd1;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:17px/1.5 "Noto Sans JP","Hiragino Sans","Meiryo",sans-serif;padding-bottom:24px}
+main{max-width:560px;margin:0 auto;padding:14px 14px 8px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+input,select{width:100%;min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r);background:#fff;font-size:17px}
+input[type=checkbox]{width:28px;min-height:28px;height:28px;accent-color:var(--ac);flex:none}
+h3{font-size:16px;color:var(--sub);margin:20px 0 8px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.nav{min-height:48px;min-width:88px;padding:8px 12px;border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:var(--r);font-size:16px}
+.date{text-align:center;flex:1}
+.date b{display:block;font-size:26px;line-height:1.25}
+.date span{font-size:15px;color:var(--sub)}
+.quiz{background:#eef3fd;color:#163a7a;border-radius:var(--r);padding:14px 16px;margin-bottom:6px}
+.quiz small{font-size:15px}
+.quiz b{display:block;font-size:22px;margin:2px 0 8px}
+.list{list-style:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.list>li,.list>label{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-bottom:1px solid var(--line)}
+.list>:last-child{border-bottom:0}
+.no{width:32px;height:32px;border-radius:8px;background:#eef3fd;color:var(--ac);display:grid;place-items:center;font-weight:700;font-size:16px;flex:none}
+.name{flex:1;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.sub{color:var(--sub);font-size:15px}
+.badge{font-size:15px;font-weight:700;padding:3px 10px;border-radius:99px;flex:none;background:#eef3fd;color:var(--ac)}
+.b部活{background:#fff1d6;color:#8a5200}.b習い事{background:#e6f5ec;color:#17683a}.b自分{background:#f1ecfb;color:#5b3aa6}.b補講{background:#fde8e8;color:#a32020}
+.chk input:checked+span{text-decoration:line-through;color:var(--sub)}
+.btn{display:block;width:100%;min-height:52px;margin-top:10px;padding:10px;font-weight:700;border-radius:var(--r);border:2px solid var(--ac);background:var(--ac);color:#fff}
+.btn.line{background:transparent;color:var(--ac);border-style:dashed}
+.del{min-height:44px;min-width:60px;border:1px solid var(--line);background:#fff;border-radius:var(--r);color:#a32020;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{min-height:46px;padding:8px 14px;border:1px solid var(--line);background:#fff;border-radius:99px;font-size:16px}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700}
+.field{margin-bottom:10px}.field label{display:block;font-size:15px;color:var(--sub);margin-bottom:4px}
+.fld{display:grid;gap:10px;margin-bottom:10px}
+.days{display:flex;flex-wrap:wrap;gap:8px}
+.days label{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:99px;background:#fff}
+.day{display:block;width:100%;text-align:left;padding:12px 14px;min-height:64px;background:#fff;border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px}
+.day.now{border:2px solid var(--ac)}
+.day b{font-size:18px}.day p{font-size:15px;color:var(--sub);overflow-wrap:anywhere}
+.empty{padding:16px;color:var(--sub);background:#fff;border:1px dashed var(--line);border-radius:var(--r)}
+nav.tabs{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+nav.tabs div{max-width:560px;margin:0 auto;display:flex}
+nav.tabs button{flex:1;min-height:56px;border:0;background:transparent;font-size:17px;color:var(--sub);font-weight:500}
+nav.tabs button.on{color:var(--ac);font-weight:700;box-shadow:inset 0 -4px 0 var(--ac)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
+.cal .h{text-align:center;font-size:15px;color:var(--sub);padding:4px 0}
+.cd{min-height:58px;padding:4px 0;border:1px solid var(--line);border-radius:8px;background:#fff;text-align:center;font-size:17px}
+.cd.t{background:#fff1d6}.cd.off b{color:#c0262d}.cd.dim{visibility:hidden}
+.dots{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;margin-top:3px;min-height:10px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dc部活{background:#f0a21a}.dc習い事{background:#2f9e5f}.dc自分{background:#7a55d6}.dc行事{background:#e8590c}.dc休み{background:#c0262d}
+.b行事{background:#ffe8d6;color:#a34200}.b休み{background:#fde8e8;color:#a32020}.bテスト{background:#fff1d6;color:#8a5200}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:15px;color:var(--sub);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.bub{padding:10px 14px;border-radius:16px;margin-bottom:8px;max-width:88%;overflow-wrap:anywhere;font-size:16px;white-space:pre-wrap}
+.bub.me{background:var(--ac);color:#fff;margin-left:auto}.bub.ai{background:#eef0f4}
+.cd{min-height:62px}.cd.hol{background:#fde8e8}.cd.evt{background:#ffe8d6}.cd.t{background:#fff1d6}.cd.sel{border:2px solid var(--text)}
+.cd.now b{background:var(--ac);color:#fff;border-radius:50%;width:32px;height:32px;display:inline-grid;place-items:center}
+.dc変更{background:#1f5fd1}
+.dp{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.dp>b{font-size:18px}
+nav.tabs button{font-size:15px}
+.cdn{background:var(--ac);color:#fff;border-radius:var(--r);padding:14px 16px;margin-bottom:12px}.cdn small{font-size:15px;opacity:.92}.cdn b{display:block;font-size:30px;line-height:1.25;margin:2px 0}.cdn .o{font-size:15px;opacity:.92}
+</style>
+</head>
+<body>
+<nav class="tabs"><div id="tabs"></div></nav>
+<main id="app"></main>
+<script>
+var smp=null,photoOk=false,ph={log:[],turns:[],items:null,file:null,img:null,busy:false},sc={log:[],turns:[],acts:null,busy:false},AIK="marugoto-ai-1",ai=loadAI(),aiEdit=false;
+var D=["日","月","火","水","木","金","土"],K="marugoto-yotei-1";
+var st=load(),view="today",rs="tt",rd=1,cur=defKey(),mo=key(new Date()).slice(0,7),rvd=cur,saveOk=true,ovs="c",calSel=key(new Date());
+var SU="https://iafjdksftyzcwbjpsufa.supabase.co",SK="sb_publishable_W3Z6W6--gCpd5xuEYVAypA_ga52TMrO",AK="marugoto-auth-1",au=null,cs="",pt=null,pulled=false;
+function jwt(t){try{return JSON.parse(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return null}}
+function loadAuth(){try{au=JSON.parse(localStorage.getItem(AK)||"null")}catch(e){au=null}}
+function setAuth(a){au=a;try{if(a)localStorage.setItem(AK,JSON.stringify(a));else localStorage.removeItem(AK)}catch(e){}}
+function hashAuth(){var h=location.hash;if(h.indexOf("access_token=")<0)return;var p=new URLSearchParams(h.slice(1)),t=p.get("access_token");if(t){var c=jwt(t)||{};setAuth({at:t,rt:p.get("refresh_token"),exp:c.exp||0,sub:c.sub,email:c.email||""})}history.replaceState(null,"",location.pathname+location.search)}
+function stat(t){cs=t;var x=document.getElementById("cs");if(x)x.textContent=t}
+async function tok(){if(!au)return null;if(au.exp*1000-Date.now()>60000)return au.at;try{var r=await fetch(SU+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:au.rt})});if(!r.ok)throw 0;var j=await r.json(),c=jwt(j.access_token)||{};setAuth({at:j.access_token,rt:j.refresh_token,exp:c.exp||0,sub:c.sub,email:au.email});return au.at}catch(e){setAuth(null);pulled=false;cs="ログインが切れました。もう一度ログインしてください";render();return null}}
+async function api(path,opt){var t=await tok();if(!t)throw 0;opt=opt||{};opt.headers=Object.assign({apikey:SK,Authorization:"Bearer "+t,"Content-Type":"application/json"},opt.headers||{});var r=await fetch(SU+"/rest/v1/"+path,opt);if(!r.ok)throw r.status;return r}
+function hasLocal(){return Object.keys(st.tt).length||st.acts.length||st.mine.length||st.ev.length||st.tests.length||Object.keys(st.ov).length||st.todos.length}
+async function pull(){if(!au)return;cs="読み込み中…";render();try{var r=await api("user_state?select=data&user_id=eq."+au.sub),j=await r.json();
+  if(j.length&&j[0].data&&Object.keys(j[0].data).length){var use=true;if(hasLocal())use=confirm("保存されている予定が見つかりました。\nOK：保存されている予定を使う\nキャンセル：このスマホの予定で上書きする");
+    if(use){st=Object.assign(def(),j[0].data);st.acts.forEach(function(a){if(!a.id)a.id=nid()});try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}cs="保存済み";pulled=true;render();return}}
+  pulled=true;await push();render()}catch(e){cs="読み込めませんでした。ネットを確認してください";render()}}
+async function push(){if(!au||!pulled)return;stat("保存中…");try{await api("user_state?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:au.sub,data:st,updated_at:new Date().toISOString()})});stat("保存済み")}catch(e){stat("保存できませんでした")}}
+function pushLater(){if(!au||!pulled)return;clearTimeout(pt);pt=setTimeout(push,1500)}
+function authBar(){if(au)return'<div class="dp" style="display:flex;align-items:center;gap:10px;padding:8px 12px"><span class="sub" style="flex:1;overflow-wrap:anywhere">ログイン中：'+e(au.email||"")+'<br><span id="cs">'+e(cs)+'</span></span><button class="del" data-a="logout">ログアウト</button></div>';return'<div class="dp"><div class="sub" style="margin-bottom:8px">ログインすると、予定が消えず、別の端末でも使えます。'+(cs?'<br>'+e(cs):'')+'</div><button class="btn" style="margin:0" data-a="login">Googleでログイン</button></div>'}
+function def(){return{tt:{},quiz:{},items:{},acts:[],mine:[],ov:{},memo:{},chk:{},xi:{},ev:[],tests:[],hw:{},hwd:{},teachers:[],todos:[]}}
+function nid(){return "a"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function load(){var d;try{d=Object.assign(def(),JSON.parse(localStorage.getItem(K)||"{}"))}catch(e){d=def()}d.acts.forEach(function(a){if(!a.id)a.id=nid()});return d}
+function save(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){saveOk=false}pushLater()}
+function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function defKey(){var n=new Date();if(n.getHours()>=16)n.setDate(n.getDate()+1);return key(n)}
+function shm(m,n){return key(new Date(+m.slice(0,4),+m.slice(5)-1+n,1)).slice(0,7)}
+function rel(k){var t=key(new Date());return k===t?"・今日":k===shift(t,1)?"・あした":""}
+function rng(a,b){return a===b?md(a):md(a)+"〜"+md(b)}
+function subjects(){var s=[],q={};for(var w in st.tt)(st.tt[w]||[]).forEach(function(n){if(n&&!q[n]){q[n]=1;s.push(n)}});return s}
+function pd(k){var a=k.split("-");return new Date(+a[0],+a[1]-1,+a[2])}
+function shift(k,n){var d=pd(k);d.setDate(d.getDate()+n);return key(d)}
+function e(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function md(k){var d=pd(k);return(d.getMonth()+1)+"月"+d.getDate()+"日"}
+function eff(k){
+  var w=pd(k).getDay(),o=st.ov[k]||{},b=st.tt[w]||[],c=o.c||{},ls=[];
+  for(var i=0;i<7;i++){var v=(i in c)?c[i]:(b[i]||"");if(v&&v!=="なし")ls.push({i:i,n:v})}
+  var evs=st.ev.filter(function(v){return v.from<=k&&k<=v.to}),nc=evs.some(function(v){return v.nc});if(nc)ls=[];
+  var q=(o.q!==undefined)?o.q:(st.quiz[w]||"");if(q==="なし"||nc)q="";
+  return{ls:ls,x:o.x||[],q:q,evs:evs,ts:st.tests.filter(function(v){return v.from<=k&&k<=v.to}),acts:st.acts.filter(function(a){return a.days.indexOf(w)>=0&&(o.a||{})[a.id]!=="なし"}).map(function(a){var t=(o.a||{})[a.id];return t?{id:a.id,t:a.t,name:a.name,time:t}:a}).concat(o.ae||[]),mine:st.mine.filter(function(m){return m.date===k})}
+}
+function items(k,x){var s=[],seen={};x.ls.concat(x.x.map(function(n){return{n:n}})).forEach(function(l){(st.items[l.n]||[]).forEach(function(t){var lb=t.indexOf(l.n)===0?t:l.n+"の"+t;if(!seen[lb]){seen[lb]=1;s.push(lb)}})});(st.xi[k]||[]).forEach(function(t){if(!seen[t]){seen[t]=1;s.push(t)}});return s}
+function today(){
+  var d=pd(cur),x=eff(cur),it=items(cur,x),ck=st.chk[cur]||{},h="";
+  h+='<div class="top"><button class="nav" data-a="prev">前の日</button><div class="date"><b>'+md(cur)+'</b><span>'+D[d.getDay()]+'曜日'+rel(cur)+'</span></div><button class="nav" data-a="next">次の日</button></div>';
+  if(cur!==defKey())h+='<button class="btn line" style="margin:0 0 12px" data-a="now">もどる</button>';
+  h+=countdown()+todayTodos();
+  x.ts.forEach(function(v){h+='<div class="quiz" style="background:#fff1d6;color:#8a5200;margin-bottom:10px"><small>テスト期間</small><b style="margin:0">'+e(v.name)+'</b></div>'});
+  if(x.q)h+='<div class="quiz"><small>朝の小テスト</small><b>'+e(x.q)+'</b><input id="memo" data-a="memo" placeholder="範囲などを一言メモ" value="'+e(st.memo[cur]||"")+'"></div>';
+  h+='<h3>今日の予定</h3>';
+  var r="";
+  x.ls.forEach(function(l){r+='<li><span class="no">'+(l.i+1)+'</span><span class="name">'+e(l.n)+'</span></li>'});
+  x.x.forEach(function(n){r+='<li><span class="badge b補講">補講</span><span class="name">'+e(n)+'</span></li>'});
+  x.acts.forEach(function(a){r+='<li><span class="badge b'+a.t+'">'+a.t+'</span><span class="name">'+e(a.name)+'</span><span class="sub">'+e(a.time||"")+'</span></li>'});
+  x.mine.forEach(function(m){r+='<li><span class="badge b自分">自分</span><span class="name">'+e(m.name)+'</span><span class="sub">'+m.part+'</span></li>'});
+  x.evs.forEach(function(v){r='<li><span class="badge b'+v.t+'">'+v.t+'</span><span class="name">'+e(v.name)+'</span></li>'+r});
+  h+=r?'<ul class="list">'+r+'</ul>':'<div class="empty">この日の予定はありません。「登録」で時間割を入れましょう。</div>';
+  h+='<h3>持ち物リスト</h3>';
+  h+=it.length?'<div class="list">'+it.map(function(t,i){return'<label class="chk"><input type="checkbox" data-a="chk" data-i="'+i+'"'+(ck[t]?" checked":"")+'><span class="name">'+e(t)+'</span></label>'}).join("")+'</div>':'<div class="empty">この日の持ち物はまだありません。</div>';
+  h+='<div class="fld" style="margin-top:10px"><input id="nx" placeholder="例：体育着"><button class="btn line" style="margin:0" data-a="addx">持ち物を足す</button></div>';
+  var hs=[],hq={};x.ls.map(function(l){return l.n}).concat(x.x).forEach(function(n){if(st.hw[n]&&!hq[n]){hq[n]=1;hs.push(n)}});
+  if(hs.length){var hd=st.hwd[cur]||{};h+='<h3>宿題は終わりましたか？</h3><div class="list">'+hs.map(function(n){return'<label class="chk"><input type="checkbox" data-a="hwk" data-n="'+e(n)+'"'+(hd[n]?" checked":"")+'><span class="name">'+e(n)+'の宿題</span></label>'}).join("")+'</div>'}
+  return h
+}
+function dayPanel(k){
+  var x=eff(k),r="";
+  x.ts.forEach(function(v){r+='<li><span class="badge bテスト">テスト</span><span class="name">'+e(v.name)+'</span></li>'});
+  x.evs.forEach(function(v){r+='<li><span class="badge b'+v.t+'">'+v.t+'</span><span class="name">'+e(v.name)+(v.nc?'<br><span class="sub">授業はありません</span>':'')+'</span></li>'});
+  x.acts.forEach(function(a){r+='<li><span class="badge b'+a.t+'">'+a.t+'</span><span class="name">'+e(a.name)+'</span><span class="sub">'+e(a.time||"")+'</span></li>'});
+  x.mine.forEach(function(m){r+='<li><span class="badge b自分">自分</span><span class="name">'+e(m.name)+'</span><span class="sub">'+m.part+'</span></li>'});
+  if(st.ov[k])r+='<li><span class="badge">変更</span><span class="name">この日は、授業や部活などに変更があります</span></li>';
+  return'<div class="dp"><b>'+md(k)+'（'+D[pd(k).getDay()]+'）'+rel(k).replace("・","　")+'</b>'+(r?'<ul class="list" style="margin-top:8px">'+r+'</ul>':'<div class="empty" style="margin-top:8px">この日の予定はありません。</div>')+'<button class="btn line" style="margin-top:8px" data-a="go" data-k="'+k+'">この日の画面をひらく</button></div>'
+}
+function week(){
+  if(calSel.slice(0,7)!==mo)calSel=mo+"-01";
+  var y=+mo.slice(0,4),m=+mo.slice(5)-1,n=new Date(y,m+1,0).getDate(),tk=key(new Date()),fk=key(new Date(y,m,1)),lk=key(new Date(y,m,n));
+  var h='<div class="top"><button class="nav" data-a="pm">前の月</button><div class="date"><b>'+y+'年'+(m+1)+'月</b></div><button class="nav" data-a="nm">次の月</button></div><div class="cal">'+D.map(function(c,i){return'<div class="h"'+(i===0?' style="color:#c0262d"':'')+'>'+c+'</div>'}).join("");
+  for(var i=0;i<new Date(y,m,1).getDay();i++)h+='<div class="cd dim"></div>';
+  for(var d=1;d<=n;d++){
+    var dt=new Date(y,m,d),k=key(dt),x=eff(k),dots=[];
+    x.evs.forEach(function(v){dots.push(v.t)});if(x.mine.length)dots.push("自分");if(st.ov[k])dots.push("変更");
+    dots=dots.filter(function(v,j){return dots.indexOf(v)===j});
+    var off=dt.getDay()===0||x.evs.some(function(v){return v.t==="休み"});
+    h+='<button class="cd'+(k===tk?" now":"")+(x.ts.length?" t":"")+(off?" off":"")+(k===calSel?" sel":"")+(x.evs.some(function(v){return v.t==="休み"})?" hol":"")+(x.evs.some(function(v){return v.t==="行事"})?" evt":"")+'" data-a="cs" data-k="'+k+'"><b>'+d+'</b><div class="dots">'+dots.map(function(t){return'<span class="dot dc'+t+'"></span>'}).join("")+'</div></button>'
+  }
+  h+='</div>'+dayPanel(calSel)+'<div class="legend"><span><i style="background:#e8590c"></i>行事</span><span><i style="background:#c0262d"></i>休み</span><span><i style="background:#7a55d6"></i>自分の予定</span><span><i style="background:#1f5fd1"></i>変更あり</span><span><i style="background:#fff1d6;border:1px solid #e3c07a"></i>テスト期間</span></div><p class="sub">日をタップすると、下の枠にその日の予定が出ます。</p>';
+  var r="";
+  st.ev.forEach(function(v){if(v.to>=fk&&v.from<=lk)r+='<li><span class="badge b'+v.t+'">'+v.t+'</span><span class="name">'+e(v.name)+'<br><span class="sub">'+rng(v.from,v.to)+'</span></span></li>'});
+  st.tests.forEach(function(v){if(v.to>=fk&&v.from<=lk)r+='<li><span class="badge bテスト">テスト</span><span class="name">'+e(v.name)+'<br><span class="sub">'+rng(v.from,v.to)+'</span></span></li>'});
+  st.mine.forEach(function(v){if(v.date>=fk&&v.date<=lk)r+='<li><span class="badge b自分">自分</span><span class="name">'+e(v.name)+'<br><span class="sub">'+md(v.date)+' '+v.part+'</span></span></li>'});
+  h+='<h3>この月の行事・予定</h3>'+(r?'<ul class="list">'+r+'</ul>':'<div class="empty">この月の行事や予定はまだありません。</div>');
+  return h
+}
+function chips(arr,cur2,a){return'<div class="chips">'+arr.map(function(c){return'<button class="chip'+(c[0]===cur2?" on":"")+'" data-a="'+a+'" data-v="'+c[0]+'">'+c[1]+'</button>'}).join("")+'</div>'}
+function reg(){
+  var h=chips([["tt","時間割"],["tc","担当者"],["it","持ち物"],["hw","宿題"],["ac","部活・習い事"],["ts","テスト期間"],["ph","写真で変更"],["ov","その日だけ変更"],["ev","行事・代休"],["mi","自分の予定"]],rs,"rs");
+  var DS=[[1,"月"],[2,"火"],[3,"水"],[4,"木"],[5,"金"],[6,"土"]];
+  if(rs==="tt"){
+    h+=chips(DS,rd,"rd");var t=st.tt[rd]||[];
+    h+='<div class="field"><label>朝の小テスト（1時間目の前）</label><input data-a="q" value="'+e(st.quiz[rd]||"")+'" placeholder="なければ空のまま"></div>';
+    for(var i=0;i<7;i++)h+='<div class="field"><label>'+(i+1)+'コマ目</label><input data-a="tt" data-i="'+i+'" value="'+e(t[i]||"")+'" placeholder="教科名"></div>'
+  }
+  if(rs==="it"){
+    var s=[],seen={};for(var w in st.tt)(st.tt[w]||[]).forEach(function(n){if(n&&!seen[n]){seen[n]=1;s.push(n)}});
+    h+=s.length?'<p class="sub" style="margin-bottom:10px">教科ごとの「必ず必要な持ち物」を、「、」で区切って入れます。持ち物リストには、教科名が自動でつきます（例：「教科書」→「国語の教科書」）。</p>'+s.map(function(n){return'<div class="field"><label>'+e(n)+'</label><input data-a="it" data-n="'+e(n)+'" value="'+e((st.items[n]||[]).join("、"))+'" placeholder="例：教科書、ノート"></div>'}).join(""):'<div class="empty">先に「時間割」を入れてください。</div>'
+  }
+  if(rs==="ac"){
+    h+='<div class="fld"><select id="at"><option>部活</option><option>習い事</option></select><input id="an" placeholder="名前（例：バスケ部）"><div class="days">'+DS.map(function(c){return'<label><input type="checkbox" class="ad" value="'+c[0]+'">'+c[1]+'</label>'}).join("")+'</div><input id="atm" type="time"><button class="btn" style="margin:0" data-a="adda">追加する</button></div>';
+    h+=st.acts.length?'<ul class="list">'+st.acts.map(function(a,i){return'<li><span class="badge b'+a.t+'">'+a.t+'</span><span class="name">'+e(a.name)+'<br><span class="sub">'+a.days.map(function(d){return D[d]}).join("・")+' '+e(a.time||"")+'</span></span><button class="del" data-a="dela" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>':''
+  }
+  if(rs==="mi"){
+    h+='<div class="fld"><input id="md" type="date" value="'+cur+'"><select id="mp"><option>終日</option><option>午前</option><option>午後</option></select><input id="mn" placeholder="予定（例：USJ）"><button class="btn" style="margin:0" data-a="addm">追加する</button></div>';
+    var ms=st.mine.map(function(m,i){return{m:m,i:i}}).sort(function(a,b){return a.m.date<b.m.date?-1:1});
+    h+=ms.length?'<ul class="list">'+ms.map(function(o){return'<li><span class="badge b自分">自分</span><span class="name">'+e(o.m.name)+'<br><span class="sub">'+md(o.m.date)+' '+o.m.part+'</span></span><button class="del" data-a="delm" data-i="'+o.i+'">消す</button></li>'}).join("")+'</ul>':''
+  }
+  if(rs==="hw"){
+    var sj=subjects();
+    h+=sj.length?'<p class="sub" style="margin-bottom:10px">宿題が出る教科を選びます。その教科の授業がある日の画面に、「宿題は終わりましたか？」が出ます。</p><div class="list">'+sj.map(function(n){return'<label class="chk"><input type="checkbox" data-a="hwsel" data-n="'+e(n)+'"'+(st.hw[n]?" checked":"")+'><span class="name">'+e(n)+'</span></label>'}).join("")+'</div>':'<div class="empty">先に「時間割」を入れてください。</div>'
+  }
+  if(rs==="ev"){
+    h+='<div class="fld"><select id="evk"><option>行事</option><option>休み</option></select><input id="en" placeholder="名前（例：文化祭、代休）"><div class="field"><label>はじまりの日</label><input id="evf" type="date" value="'+cur+'"></div><div class="field"><label>おわりの日（1日だけなら同じ日）</label><input id="evt" type="date" value="'+cur+'"></div><label class="days" style="border:0;padding:0"><span style="display:flex;align-items:center;gap:8px;min-height:44px"><input type="checkbox" id="evn" checked>この日は授業がない</span></label><button class="btn" style="margin:0" data-a="adde">追加する</button></div>';
+    h+=st.ev.length?'<ul class="list">'+st.ev.map(function(v,i){return'<li><span class="badge b'+v.t+'">'+v.t+'</span><span class="name">'+e(v.name)+'<br><span class="sub">'+rng(v.from,v.to)+(v.nc?" ・授業なし":"")+'</span></span><button class="del" data-a="dele" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>':''
+  }
+  if(rs==="ts"){
+    h+='<div class="fld"><input id="tn" placeholder="名前（例：期末テスト）"><div class="field"><label>はじまりの日</label><input id="tf" type="date" value="'+cur+'"></div><div class="field"><label>おわりの日</label><input id="tu" type="date" value="'+cur+'"></div><button class="btn" style="margin:0" data-a="addt">追加する</button></div>';
+    h+=st.tests.length?'<ul class="list">'+st.tests.map(function(v,i){return'<li><span class="badge bテスト">テスト</span><span class="name">'+e(v.name)+'<br><span class="sub">'+rng(v.from,v.to)+'</span></span><button class="del" data-a="delt" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>':''
+  }
+  if(rs==="tc"){
+    var sj2=subjects();
+    h+='<p class="sub" style="margin-bottom:10px">時間割の変更が、担当者（先生）の名前で発表される場合に使います。先に登録しておくと、写真の読み取りで、教科に直してくれます。</p>';
+    h+=sj2.length?'<div class="fld"><input id="tcn" placeholder="担当者の名前（例：田中）"><select id="tcs">'+sj2.map(function(n){return'<option>'+e(n)+'</option>'}).join("")+'</select><button class="btn" style="margin:0" data-a="addtc">追加する</button></div>':'<div class="empty">先に「時間割」を入れてください。</div>';
+    h+=st.teachers.length?'<ul class="list">'+st.teachers.map(function(v,i){return'<li><span class="name">'+e(v.name)+'<br><span class="sub">'+e(v.subj)+'</span></span><button class="del" data-a="deltc" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>':''
+  }
+  if(rs==="ph"){
+    h+='<p class="sub" style="margin-bottom:8px">時間割変更のお知らせの写真を選んで、AIと相談しながら、読み取りを確認できます。写真がなくても、文字だけで伝えられます。担当者の名前で発表される学校では、先に「担当者」を登録しておくと、教科に直して読み取ります。反映する前に、内容を確認できます。</p><p class="sub" style="margin-bottom:12px">写真や文章は、えらんだAI（'+pn()+'）に送られます。関係ない名前などが写らないようにしてください。</p>';
+    h+=aiPicker();if(!ready())h+='<div class="empty">上でAIをえらんで、キーを入れると使えます。それまでは「その日だけ変更」で、手で入れてください。</div>';
+    else{
+      h+='<label class="btn line" style="text-align:center;line-height:30px;cursor:pointer;margin-bottom:14px">'+(ph.file?"写真をえらびなおす（最初からやりなおし）":"写真をえらぶ")+'<input type="file" accept="image/*" data-a="phf" style="display:none"></label>';
+      h+=ph.log.map(function(m){return'<div class="bub '+m.w+'">'+e(m.t)+'</div>'}).join("")+(ph.busy?'<div class="bub ai">考え中です…少し時間がかかります</div>':'');
+      if(ph.items&&ph.items.length){
+        h+='<h3>いまの読み取り</h3><ul class="list">'+ph.items.map(function(it){var t=it.k==="c"?it.p+"コマ目　→　"+it.s:it.k==="x"?"補講　→　"+it.s:"朝の小テスト　→　"+it.s;return'<li><span class="name">'+md(it.date)+'（'+D[pd(it.date).getDay()]+'）<br><span class="sub">'+e(t)+'</span></span></li>'}).join("")+'</ul><button class="btn" data-a="phok">この内容で反映する</button><button class="btn line" data-a="phno">やめる</button>'
+      }
+      h+='<div class="fld" style="margin-top:14px"><input id="chat" placeholder="例：3時間目は理科じゃなくて数学です"><button class="btn" style="margin:0" data-a="chat">送る</button></div>'
+    }
+  }
+  if(rs==="ov"){
+    var w=pd(rvd).getDay(),x=eff(rvd),o=st.ov[rvd]||{};
+    h+='<div class="field"><label>変更する日（'+md(rvd)+'・'+D[pd(rvd).getDay()]+'曜日）</label><input type="date" data-a="ovd" value="'+rvd+'"></div><p class="sub" style="margin-bottom:10px">書き直すと、この日だけ変わります。授業を消すときは「なし」と入れます。</p>';
+    h+=chips([["c","授業・朝の小テスト"],["a","部活・習い事"]],ovs,"ovs");
+    if(ovs==="c"){
+    h+='<div class="field"><label>朝の小テスト</label><input data-a="ovq" value="'+e(x.q)+'"></div>';
+    var c=o.c||{};for(var i=0;i<7;i++){var v=(i in c)?c[i]:((st.tt[w]||[])[i]||"");h+='<div class="field"><label>'+(i+1)+'コマ目</label><input data-a="ovc" data-i="'+i+'" value="'+e(v)+'"></div>'}
+    h+='<div class="fld"><input id="ox" placeholder="補講の教科（例：数学）"><button class="btn line" style="margin:0" data-a="addox">補講を足す</button></div>';
+    if(x.x.length)h+='<ul class="list">'+x.x.map(function(n,i){return'<li><span class="badge b補講">補講</span><span class="name">'+e(n)+'</span><button class="del" data-a="delox" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>';
+    }else{
+    var oa=o.a||{},ba=st.acts.filter(function(a){return a.days.indexOf(w)>=0});
+    h+=ba.length?ba.map(function(a){var off=oa[a.id]==="なし";return'<div class="field"><label>'+e(a.name)+'（'+a.t+'）</label>'+(off?'<div class="sub" style="margin-bottom:6px">この日は休みにしています</div>':'<input type="time" data-a="ova" data-id="'+a.id+'" value="'+e(oa[a.id]||a.time||"")+'">')+'<button class="btn line" style="margin-top:6px" data-a="ovoff" data-id="'+a.id+'">'+(off?"休みを取り消す":"この日は休み")+'</button></div>'}).join(""):'<div class="empty">この曜日の部活・習い事は登録されていません。</div>';
+    h+='<div class="fld" style="margin-top:12px"><select id="oat"><option>部活</option><option>習い事</option></select><input id="oan" placeholder="この日だけの予定（例：臨時練習）"><input id="oatm" type="time"><button class="btn line" style="margin:0" data-a="addoe">この日だけ足す</button></div>';
+    if((o.ae||[]).length)h+='<ul class="list">'+o.ae.map(function(a,i){return'<li><span class="badge b'+a.t+'">'+a.t+'</span><span class="name">'+e(a.name)+'<br><span class="sub">'+e(a.time||"")+'</span></span><button class="del" data-a="deloe" data-i="'+i+'">消す</button></li>'}).join("")+'</ul>';
+    }
+    if(st.ov[rvd])h+='<button class="btn line" data-a="rstov">この日の変更をすべて元に戻す</button>'
+  }
+  return h
+}
+function render(){
+  var a=document.getElementById("app");
+  a.innerHTML=authBar()+(view==="today"?today():view==="week"?week():view==="todo"?todo():view==="sec"?sec():reg())+(saveOk?"":'<p class="sub" style="margin-top:16px">この画面では記録を保存できません。ふだんのブラウザで開いてください。</p>');
+  document.getElementById("tabs").innerHTML=[["today","今日"],["week","カレンダー"],["todo","ToDo"],["sec","秘書"],["reg","登録"]].map(function(t){return'<button class="'+(view===t[0]?"on":"")+'" data-a="v" data-v="'+t[0]+'">'+t[1]+'</button>'}).join("")
+}
+function sysText(){
+  var tk=key(new Date()),ctx=[1,2,3,4,5,6].map(function(w){return D[w]+"曜日："+(st.tt[w]||[]).map(function(n,i){return(i+1)+"コマ目="+(n||"なし")}).join("、")+(st.quiz[w]?"、朝の小テスト="+st.quiz[w]:"")}).join("\n");
+  return "あなたは、学生の予定アプリの中で、時間割変更を一緒に確認する相談相手です。やさしい言葉で、短く答えてください。専門用語は使わないでください。\n写真（あれば）は、学校の時間割変更のお知らせです。写真と、やりとりの内容から、変更を読み取ります。\n今日は"+tk+"（"+D[pd(tk).getDay()]+"曜日）です。年が書かれていなければ、今日に近い未来の年にしてください。曜日だけなら、今日以降で一番近いその曜日の日付にしてください。\nふだんの時間割は次の通りです。教科名は、できるだけこの中の名前に合わせてください。\n"+ctx+"\n"+"変更は、教科ではなく、担当者（先生）の名前で書かれていることがあります。登録されている担当者と教科は次の通りです（名前＝教科）："+(st.teachers.length?st.teachers.map(function(t){return t.name+"＝"+t.subj}).join("、"):"まだ登録なし")+"。担当者の名前で書かれていたら、この表を使って教科名に直して subject に入れてください。表にない担当者は、subject に入れず、reply で「○○先生は何の教科ですか？」と質問してください。\n授業をなくすときは subject を「なし」にしてください。写真にないことや、自信がないことは入れず、reply で質問してください。\n毎回、次の形のJSONだけを返してください。changes・extra・quiz には、いま分かっている変更を、前の分もふくめて全部入れてください。\n{\"reply\":\"相手に見せる返事（2〜3文まで）\",\"changes\":[{\"date\":\"YYYY-MM-DD\",\"period\":1から7の数字,\"subject\":\"教科名またはなし\"}],\"extra\":[{\"date\":\"YYYY-MM-DD\",\"subject\":\"補講の教科名\"}],\"quiz\":[{\"date\":\"YYYY-MM-DD\",\"subject\":\"教科名またはなし\"}]}\n変更がなければ、3つとも空の配列にしてください。"
+}
+var DM={claude:"claude-sonnet-5-5",openai:"gpt-4o",gemini:"gemini-2.5-flash"},PN={sample:"Claude",claude:"Claude",openai:"ChatGPT",gemini:"Gemini"},HL={claude:"console.anthropic.com",openai:"platform.openai.com",gemini:"aistudio.google.com"};
+function loadAI(){var a;try{a=JSON.parse(localStorage.getItem(AIK)||"{}")}catch(x){a={}}a=a||{};a.k=a.k||{};a.m=a.m||{};return a}
+function saveAI(){try{localStorage.setItem(AIK,JSON.stringify(ai))}catch(x){}}
+function sOk(){return!!(smp&&photoOk)}
+function curP(){var p=ai.p;if(p==="sample"&&!sOk())p="";return p||(sOk()?"sample":"claude")}
+function pn(){return PN[curP()]}
+function ready(){var p=curP();return p==="sample"?sOk():!!ai.k[p]}
+function days(a,b){return Math.round((pd(b)-pd(a))/864e5)}
+function aiPicker(){var p=curP(),h='<h3>使うAI</h3>'+chips((sOk()?[["sample","Claude（キー不要）"]]:[]).concat([["claude","Claude"],["openai","ChatGPT"],["gemini","Gemini"]]),p,"aip");
+  if(p!=="sample"){
+    if(!ai.k[p]||aiEdit)h+='<div class="field"><label>'+PN[p]+'のAPIキー（このスマホの中だけに保存）</label><input type="password" autocomplete="off" data-a="aikey" data-p="'+p+'" value="'+e(ai.k[p]||"")+'" placeholder="キーを貼りつけ"></div><div class="field"><label>モデル名（ふつうは変えなくてOK）</label><input data-a="aimodel" data-p="'+p+'" value="'+e(ai.m[p]||"")+'" placeholder="'+DM[p]+'"></div><p class="sub" style="margin-bottom:8px">キーは '+HL[p]+' で作れます。アプリの月額プランとは別のものです。</p>';
+    if(ai.k[p])h+='<button class="btn line" style="margin:0 0 10px" data-a="aiedit">'+(aiEdit?"とじる":"キー・モデルを変える")+'</button>'}
+  return h}
+function prepImg(f){return new Promise(function(ok,ng){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){var s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);var d=c.toDataURL("image/jpeg",.85);URL.revokeObjectURL(u);ok({mime:"image/jpeg",data:d.split(",")[1],url:d})};im.onerror=function(){URL.revokeObjectURL(u);ng()};im.src=u})}
+function pj(t){t=String(t).replace(/```json|```/g,"");try{return JSON.parse(t)}catch(x){return JSON.parse(t.slice(t.indexOf("{"),t.lastIndexOf("}")+1))}}
+async function aiJson(sys,turns,img,file){
+  var p=curP(),k=ai.k[p]||"",m=ai.m[p]||DM[p],r,j,tx;
+  if(p==="sample"){var o={cache:false};if(file&&img)o.images=[file];return await smp.json([{role:"user",content:sys}].concat(turns),o)}
+  if(p==="openai"){
+    r=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+k},body:JSON.stringify({model:m,response_format:{type:"json_object"},messages:[{role:"system",content:sys}].concat(turns.map(function(t,i){return i===0&&img?{role:t.role,content:[{type:"text",text:t.content},{type:"image_url",image_url:{url:img.url}}]}:t}))})});
+    if(!r.ok)throw{status:r.status};j=await r.json();tx=j.choices[0].message.content}
+  else if(p==="gemini"){
+    r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(m)+":generateContent?key="+encodeURIComponent(k),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},generationConfig:{responseMimeType:"application/json"},contents:turns.map(function(t,i){var ps=[{text:t.content}];if(i===0&&img)ps.push({inlineData:{mimeType:img.mime,data:img.data}});return{role:t.role==="assistant"?"model":"user",parts:ps}})})});
+    if(!r.ok)throw{status:r.status};j=await r.json();tx=j.candidates[0].content.parts.map(function(q){return q.text||""}).join("")}
+  else{
+    r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:m,max_tokens:2000,system:sys,messages:turns.map(function(t,i){return i===0&&img?{role:t.role,content:[{type:"image",source:{type:"base64",media_type:img.mime,data:img.data}},{type:"text",text:t.content}]}:t})})});
+    if(!r.ok)throw{status:r.status};j=await r.json();tx=j.content.map(function(q){return q.text||""}).join("")}
+  return pj(tx)}
+function aiErr(er){return er&&er.code==="not_granted"?"AIの利用が許可されなかったので、答えられません。":er&&er.status?"AIからエラー（"+er.status+"）が返りました。キーとモデル名を確認してください。":"うまくつながりませんでした。ネットとキーを確認して、もう一度送ってください。"}
+function countdown(){var tk=key(new Date()),up=st.tests.filter(function(v){return v.to>=tk}).sort(function(a,b){return a.from<b.from?-1:1});
+  if(!up.length)return'<p class="sub" style="margin-bottom:10px">「登録」→「テスト期間」を入れると、ここにカウントダウンが出ます。</p>';
+  var f=up[0],dd=days(tk,f.from),big,lb;
+  if(dd<=0){var lf=days(tk,f.to);lb=f.name+"（"+rng(f.from,f.to)+"）";big=lf===0?"今日が最終日":"テスト期間中（最終日まであと"+lf+"日）"}else{lb=f.name+"まで（"+rng(f.from,f.to)+"）";big=dd===1?"あした！":"あと"+dd+"日"}
+  var o=up.slice(1,3).map(function(v){var n=days(tk,v.from);return'<div class="o">'+e(v.name)+'：'+(n<=0?"期間中":"あと"+n+"日")+'</div>'}).join("");
+  return'<div class="cdn"><small>'+e(lb)+'</small><b>'+big+'</b>'+o+'</div>'}
+function tdRow(v){var tk=key(new Date()),b=v.due?(v.due<tk&&!v.done?'<span class="badge b補講">期限すぎ</span>':'<span class="badge">'+(v.due===tk?"今日":md(v.due))+'</span>'):'';return'<li class="chk"><input type="checkbox" data-a="tdk" data-id="'+v.id+'"'+(v.done?" checked":"")+'><span class="name">'+e(v.t)+'</span>'+b+'<button class="del" data-a="deltd" data-id="'+v.id+'">消す</button></li>'}
+function todayTodos(){var o=st.todos.filter(function(v){return!v.done&&v.due&&v.due<=cur});return o.length?'<h3>やること（今日まで）</h3><ul class="list" style="margin-bottom:10px">'+o.map(tdRow).join("")+'</ul>':''}
+function todo(){var o=st.todos.filter(function(v){return!v.done}).sort(function(a,b){return(a.due||"9")<(b.due||"9")?-1:1}),d=st.todos.filter(function(v){return v.done});
+  var h='<div class="fld" style="margin-top:8px"><input id="tdn" placeholder="やること（例：数学のワーク p.30）"><div class="field"><label>期限（なくてもOK）</label><input id="tdd" type="date"></div><button class="btn" style="margin:0" data-a="addtd">追加する</button></div>';
+  h+='<h3>これからやること</h3>'+(o.length?'<ul class="list">'+o.map(tdRow).join("")+'</ul>':'<div class="empty">ToDoはありません。</div>');
+  if(d.length)h+='<h3>終わったこと</h3><ul class="list">'+d.map(tdRow).join("")+'</ul><button class="btn line" data-a="clrtd">終わったものを全部消す</button>';
+  return h}
+function secCtx(){var tk=key(new Date()),L=[];
+  for(var i=0;i<8;i++){var k=shift(tk,i),x=eff(k),p=[];
+    if(x.evs.length)p.push("行事："+x.evs.map(function(v){return v.name+(v.nc?"(授業なし)":"")}).join("、"));
+    if(x.ts.length)p.push("テスト期間："+x.ts.map(function(v){return v.name}).join("、"));
+    if(x.ls.length)p.push("授業："+x.ls.map(function(l){return(l.i+1)+"限"+l.n}).join(" "));
+    if(x.q)p.push("朝の小テスト："+x.q);if(x.x.length)p.push("補講："+x.x.join("、"));
+    if(x.acts.length)p.push("部活・習い事："+x.acts.map(function(a){return a.name+(a.time?" "+a.time:"")}).join("、"));
+    if(x.mine.length)p.push("自分の予定："+x.mine.map(function(m){return m.name+"("+m.part+")"}).join("、"));
+    var it=items(k,x);if(it.length&&i<2)p.push("持ち物："+it.join("、"));
+    L.push(k+"（"+D[pd(k).getDay()]+"）"+(i===0?"今日":i===1?"あした":"")+"："+(p.join(" / ")||"予定なし"))}
+  var ts=st.tests.filter(function(v){return v.to>=tk}).map(function(v){return v.name+" "+v.from+"〜"+v.to}),td=st.todos.filter(function(v){return!v.done}).map(function(v){return v.t+(v.due?"（期限"+v.due+"）":"")});
+  return L.join("\n")+"\n【これからのテスト】"+(ts.join("、")||"なし")+"\n【ToDo（未完了）】"+(td.join("、")||"なし")}
+function secSys(){var tk=key(new Date());
+  return "あなたは、学生の予定アプリに入っている『AI秘書』です。やさしい言葉で、3文までの短さで答えてください。専門用語は使わないでください。\n今日は"+tk+"（"+D[pd(tk).getDay()]+"曜日）です。\n【今日から8日間の予定】\n"+secCtx()+"\n質問には、この情報をもとに答えてください。分からないことは、分からないと言ってください。\nToDo・予定・持ち物を足してほしいと頼まれたときだけ、actions に入れてください。頼まれていないのに足さないでください。日付は YYYY-MM-DD の形です。\n毎回、次の形のJSONだけを返してください。\n{\"reply\":\"返事\",\"actions\":[{\"type\":\"todo\",\"text\":\"やること\",\"due\":\"YYYY-MM-DD または空\"},{\"type\":\"mine\",\"date\":\"YYYY-MM-DD\",\"part\":\"終日か午前か午後\",\"name\":\"予定\"},{\"type\":\"item\",\"date\":\"YYYY-MM-DD\",\"name\":\"持ち物\"}]}\n足すものがなければ actions は空の配列にしてください。"}
+function parseActs(r){var ok=function(d){return typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(pd(d).getTime())},s=function(v){return typeof v==="string"&&v.trim()&&v.length<=40?v.trim():null},o=[];
+  ((r&&r.actions)||[]).forEach(function(a){if(!a)return;
+    if(a.type==="todo"&&s(a.text))o.push({k:"todo",t:s(a.text),due:ok(a.due)?a.due:""});
+    else if(a.type==="mine"&&ok(a.date)&&s(a.name))o.push({k:"mine",date:a.date,part:["終日","午前","午後"].indexOf(a.part)>=0?a.part:"終日",name:s(a.name)});
+    else if(a.type==="item"&&ok(a.date)&&s(a.name))o.push({k:"item",date:a.date,name:s(a.name)})});
+  return o}
+function askSec(text){
+  sc.log.push({w:"me",t:text});sc.turns.push({role:"user",content:text});sc.busy=true;sc.acts=null;render();window.scrollTo(0,document.body.scrollHeight);
+  aiJson(secSys(),sc.turns,null,null).then(function(r){
+    sc.acts=parseActs(r);var rp=(r&&typeof r.reply==="string"&&r.reply.trim())?r.reply.trim().slice(0,600):"はい。";
+    sc.log.push({w:"ai",t:rp});sc.turns.push({role:"assistant",content:JSON.stringify(r||{})});sc.busy=false;render();window.scrollTo(0,document.body.scrollHeight)
+  }).catch(function(er){sc.turns.pop();sc.log.push({w:"ai",t:aiErr(er)});sc.busy=false;render()})}
+function applySec(){sc.acts.forEach(function(a){if(a.k==="todo")st.todos.push({id:nid(),t:a.t,due:a.due,done:false});else if(a.k==="mine")st.mine.push({date:a.date,part:a.part,name:a.name});else(st.xi[a.date]=st.xi[a.date]||[]).push(a.name)});sc.acts=null;sc.log.push({w:"ai",t:"追加しました。「ToDo」や「カレンダー」で確認できます。"})}
+function sec(){var h='<p class="sub" style="margin:8px 0">予定・テスト・ToDoを知っているAI秘書です。質問したり、ToDoや予定の追加をお願いしたりできます。予定の内容は、えらんだAI（'+pn()+'）に送られます。</p>'+aiPicker();
+  if(!ready())return h+'<div class="empty">AIのキーを入れると使えます。</div>';
+  h+='<h3>聞いてみる</h3><div class="chips">'+["今日とあしたの予定を教えて","あしたの持ち物は？","今週やることをまとめて","テスト勉強の計画を立てて"].map(function(q){return'<button class="chip" data-a="secq" data-v="'+q+'">'+q+'</button>'}).join("")+'</div>';
+  h+=sc.log.map(function(m){return'<div class="bub '+m.w+'">'+e(m.t)+'</div>'}).join("")+(sc.busy?'<div class="bub ai">考え中です…</div>':'');
+  if(sc.acts&&sc.acts.length)h+='<h3>追加する内容</h3><ul class="list">'+sc.acts.map(function(a){var t=a.k==="todo"?"ToDo　→　"+a.t+(a.due?"（期限 "+md(a.due)+"）":""):a.k==="mine"?md(a.date)+" "+a.part+"　→　"+a.name:md(a.date)+"の持ち物　→　"+a.name;return'<li><span class="name">'+e(t)+'</span></li>'}).join("")+'</ul><button class="btn" data-a="secok">この内容で追加する</button><button class="btn line" data-a="secno">やめる</button>';
+  return h+'<div class="fld" style="margin-top:14px"><input id="scin" placeholder="例：金曜までに英語のワークをToDoに入れて"><button class="btn" style="margin:0" data-a="secsend">送る</button></div>'}
+function parseItems(r){
+  var ok=function(d){return typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(pd(d).getTime())},sj=function(v){return typeof v==="string"&&v.trim()&&v.length<=20?v.trim():null},its=[];
+  ((r&&r.changes)||[]).forEach(function(c){var p=+c.period;if(ok(c.date)&&p>=1&&p<=7&&sj(c.subject))its.push({k:"c",date:c.date,p:p,s:sj(c.subject)})});
+  ((r&&r.extra)||[]).forEach(function(c){if(ok(c.date)&&sj(c.subject)&&c.subject!=="なし")its.push({k:"x",date:c.date,s:sj(c.subject)})});
+  ((r&&r.quiz)||[]).forEach(function(c){if(ok(c.date)&&sj(c.subject))its.push({k:"q",date:c.date,s:sj(c.subject)})});
+  return its
+}
+function askAI(text){
+  var msg=text||"写真を読み取ってください";
+  ph.log.push({w:"me",t:msg});ph.turns.push({role:"user",content:msg});ph.busy=true;render();
+  aiJson(sysText(),ph.turns,ph.file?ph.img:null,ph.file).then(function(r){
+    ph.items=parseItems(r);
+    var rp=(r&&typeof r.reply==="string"&&r.reply.trim())?r.reply.trim().slice(0,400):(ph.items.length?"次のように読み取りました。":"変更は読み取れませんでした。");
+    ph.log.push({w:"ai",t:rp});ph.turns.push({role:"assistant",content:JSON.stringify(r||{})});ph.busy=false;render()
+  }).catch(function(er){
+    ph.turns.pop();ph.log.push({w:"ai",t:aiErr(er)});ph.busy=false;render()
+  })
+}
+function applyPhoto(){
+  ph.items.forEach(function(it){var o=st.ov[it.date]=st.ov[it.date]||{},w=pd(it.date).getDay();
+    if(it.k==="c"){var b=(st.tt[w]||[])[it.p-1]||"";o.c=o.c||{};if(it.s===b)delete o.c[it.p-1];else o.c[it.p-1]=it.s}
+    else if(it.k==="x"){(o.x=o.x||[]).push(it.s)}
+    else{if(it.s===(st.quiz[w]||""))delete o.q;else o.q=it.s}
+    clean(it.date)});
+  ph.items=null;ph.turns=[];ph.file=null;ph.log.push({w:"ai",t:"反映しました。「カレンダー」や「今日」で確認できます。"})
+}
+function clean(k){var o=st.ov[k];if(!o)return;if(o.c&&!Object.keys(o.c).length)delete o.c;if(o.x&&!o.x.length)delete o.x;if(o.a&&!Object.keys(o.a).length)delete o.a;if(o.ae&&!o.ae.length)delete o.ae;if(!o.c&&!o.x&&o.q===undefined&&!o.a&&!o.ae)delete st.ov[k]}
+function ovo(){return st.ov[rvd]=st.ov[rvd]||{}}
+document.addEventListener("click",function(ev){
+  var t=ev.target.closest("[data-a]");if(!t)return;var a=t.dataset.a,v=t.dataset.v,i=+t.dataset.i;
+  if(["v","prev","next","now","go","pm","nm","adde","dele","addt","delt","ovoff","addoe","deloe","phok","phno","chat","ovs","cs","login","logout","addtc","deltc","rs","rd","addx","adda","dela","addm","delm","addox","delox","rstov","addtd","deltd","clrtd","aip","aiedit","secsend","secq","secok","secno"].indexOf(a)<0)return;
+  if(a==="v")view=v;
+  else if(a==="prev")cur=shift(cur,-1);else if(a==="next")cur=shift(cur,1);else if(a==="now")cur=defKey();
+  else if(a==="go"){cur=t.dataset.k;view="today"}
+  else if(a==="pm"){mo=shm(mo,-1);calSel=mo+"-01"}else if(a==="nm"){mo=shm(mo,1);calSel=mo+"-01"}
+  else if(a==="rs")rs=v;else if(a==="rd")rd=+v;
+  else if(a==="ovs")ovs=v;
+  else if(a==="login"){location.href=SU+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(location.origin+location.pathname);return}
+  else if(a==="logout"){setAuth(null);pulled=false;cs="";render();return}
+  else if(a==="cs"){calSel=t.dataset.k;render();return}
+  else if(a==="addx"){var n=document.getElementById("nx").value.trim();if(n){(st.xi[cur]=st.xi[cur]||[]).push(n)}}
+  else if(a==="adda"){var nm=document.getElementById("an").value.trim(),ds=[].slice.call(document.querySelectorAll(".ad:checked")).map(function(c){return+c.value});if(nm&&ds.length)st.acts.push({id:nid(),t:document.getElementById("at").value,name:nm,days:ds,time:document.getElementById("atm").value})}
+  else if(a==="dela")st.acts.splice(i,1);
+  else if(a==="addtc"){var tn2=document.getElementById("tcn").value.trim();if(tn2)st.teachers.push({name:tn2,subj:document.getElementById("tcs").value})}
+  else if(a==="deltc")st.teachers.splice(i,1);
+  else if(a==="ovoff"){var o3=ovo();o3.a=o3.a||{};if(o3.a[t.dataset.id]==="なし")delete o3.a[t.dataset.id];else o3.a[t.dataset.id]="なし";clean(rvd)}
+  else if(a==="addoe"){var on=document.getElementById("oan").value.trim();if(on)(ovo().ae=ovo().ae||[]).push({t:document.getElementById("oat").value,name:on,time:document.getElementById("oatm").value})}
+  else if(a==="deloe"){st.ov[rvd].ae.splice(i,1);clean(rvd)}
+  else if(a==="addtd"){var tx=document.getElementById("tdn").value.trim();if(tx)st.todos.push({id:nid(),t:tx,due:document.getElementById("tdd").value||"",done:false})}
+  else if(a==="deltd")st.todos=st.todos.filter(function(x){return x.id!==t.dataset.id});
+  else if(a==="clrtd")st.todos=st.todos.filter(function(x){return!x.done});
+  else if(a==="aip"){ai.p=v;saveAI()}
+  else if(a==="aiedit")aiEdit=!aiEdit;
+  else if(a==="secsend"){var sv=document.getElementById("scin").value.trim();if(sv&&!sc.busy&&ready())askSec(sv);return}
+  else if(a==="secq"){if(!sc.busy&&ready())askSec(v);return}
+  else if(a==="secok")applySec();
+  else if(a==="secno"){sc.acts=null;sc.log.push({w:"ai",t:"やめました。追加していません。"})}
+  else if(a==="phok")applyPhoto();
+  else if(a==="phno"){ph.items=null;ph.log.push({w:"ai",t:"やめました。反映していません。"})}
+  else if(a==="chat"){var cv=document.getElementById("chat").value.trim();if(cv&&!ph.busy&&ready())askAI(cv);return}
+  else if(a==="addm"){var mn=document.getElementById("mn").value.trim(),mdv=document.getElementById("md").value;if(mn&&mdv)st.mine.push({date:mdv,part:document.getElementById("mp").value,name:mn})}
+  else if(a==="delm")st.mine.splice(i,1);
+  else if(a==="adde"){var en=document.getElementById("en").value.trim(),f=document.getElementById("evf").value,u=document.getElementById("evt").value||f;if(en&&f){if(u<f)u=f;st.ev.push({t:document.getElementById("evk").value,name:en,from:f,to:u,nc:document.getElementById("evn").checked})}}
+  else if(a==="dele")st.ev.splice(i,1);
+  else if(a==="addt"){var tn=document.getElementById("tn").value.trim(),tf=document.getElementById("tf").value,tu=document.getElementById("tu").value||tf;if(tn&&tf){if(tu<tf)tu=tf;st.tests.push({name:tn,from:tf,to:tu})}}
+  else if(a==="delt")st.tests.splice(i,1);
+  else if(a==="addox"){var ox=document.getElementById("ox").value.trim();if(ox)(ovo().x=ovo().x||[]).push(ox)}
+  else if(a==="delox"){st.ov[rvd].x.splice(i,1);clean(rvd)}
+  else if(a==="rstov")delete st.ov[rvd];
+  save();render();window.scrollTo(0,0)
+});
+document.addEventListener("input",function(ev){
+  var t=ev.target,a=t.dataset.a;if(!a)return;var v=t.value;
+  if(a==="memo")st.memo[cur]=v;
+  else if(a==="tt"){(st.tt[rd]=st.tt[rd]||[])[+t.dataset.i]=v.trim()}
+  else if(a==="q")st.quiz[rd]=v.trim();
+  else if(a==="it")st.items[t.dataset.n]=v.split(/[、,，\s]+/).filter(Boolean);
+  else return;
+  save()
+});
+document.addEventListener("change",function(ev){
+  var t=ev.target,a=t.dataset.a;if(!a)return;var v=t.value.trim();
+  if(a==="phf"){var f=t.files&&t.files[0];if(f&&ready()&&!ph.busy){ph.busy=true;ph.log=[];ph.turns=[];ph.items=null;render();prepImg(f).catch(function(){return null}).then(function(im){ph.busy=false;if(!im){ph.log.push({w:"ai",t:"写真を読み込めませんでした。別の写真でためしてください。"});render();return}ph.file=f;ph.img=im;askAI("")})}return}
+  if(a==="ova"){var ao=ovo();ao.a=ao.a||{};var ac=st.acts.filter(function(x){return x.id===t.dataset.id})[0];if(!v||(ac&&v===ac.time))delete ao.a[t.dataset.id];else ao.a[t.dataset.id]=v;clean(rvd);save();return}
+  if(a==="tdk"){var td=st.todos.filter(function(x){return x.id===t.dataset.id})[0];if(td)td.done=t.checked;save();render();return}
+  if(a==="aikey"){ai.k[t.dataset.p]=v;saveAI();render();return}
+  if(a==="aimodel"){ai.m[t.dataset.p]=v;saveAI();return}
+  if(a==="hwk"){st.hwd[cur]=st.hwd[cur]||{};st.hwd[cur][t.dataset.n]=t.checked;save()}
+  else if(a==="hwsel"){if(t.checked)st.hw[t.dataset.n]=true;else delete st.hw[t.dataset.n];save()}
+  else if(a==="chk"){var x=eff(cur),n=items(cur,x)[+t.dataset.i];st.chk[cur]=st.chk[cur]||{};st.chk[cur][n]=t.checked;save()}
+  else if(a==="ovd"){if(v){rvd=v;render()}}
+  else if(a==="ovc"){var w=pd(rvd).getDay(),b=(st.tt[w]||[])[+t.dataset.i]||"",o=ovo();o.c=o.c||{};if(v===b)delete o.c[t.dataset.i];else o.c[t.dataset.i]=v||"なし";clean(rvd);save()}
+  else if(a==="ovq"){var w2=pd(rvd).getDay(),b2=st.quiz[w2]||"",o2=ovo();if(v===b2)delete o2.q;else o2.q=v||"なし";clean(rvd);save()}
+});
+document.addEventListener("keydown",function(ev){if(ev.target.id==="chat"&&ev.key==="Enter"&&!ev.isComposing){ev.preventDefault();var cv=ev.target.value.trim();if(cv&&!ph.busy&&ready())askAI(cv)}if(ev.target.id==="scin"&&ev.key==="Enter"&&!ev.isComposing){ev.preventDefault();var sv=ev.target.value.trim();if(sv&&!sc.busy&&ready())askSec(sv)}});
+loadAuth();hashAuth();save();render();if(au)pull();
+try{if(window.claude&&window.claude.use)window.claude.use("sample").then(function(sm){if(!sm)return;smp=sm;return Promise.resolve(sm.limits()).then(function(l){photoOk=!!(l&&l.images);render()})}).catch(function(){})}catch(er){}
+</script>
+</body>
+</html>
